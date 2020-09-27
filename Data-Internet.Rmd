@@ -1,0 +1,72 @@
+---
+title: "Data-Internet"
+output: html_document
+---
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(htmltab)
+library(stringr)
+library(readr) 
+library(rio)
+```
+Importar la base directamente de GitHub
+```{r}
+dataInter= "https://github.com/IFrancisco10/BaseDeDatos/raw/master/conexInternet.xlsX"
+Internet=import(dataInter)
+```
+
+Procedemos a revisar la data
+```{r}
+names(Internet)
+str(Internet)
+```
+
+Se elimina columna código
+```{r}
+Internet$Código= NULL
+```
+
+Nueva Variable "Regiones"
+```{r}
+Internet$Regiones=str_split(string = Internet$Provincia,
+         pattern = ',',
+         simplify = T)[,1]
+```
+
+Ahora separo a las provincias de las regiones y le pongo de nombre Provincias
+```{r}
+Internet$Provincia=str_split(string = Internet$Provincia,
+         pattern = ':',
+         simplify = T)[,2]
+```
+
+Luego, procedo a eliminar las columnas rural y urbano, que si bien son importantes en dicha encuesta, no son en lo que nos enfocamos en este trabajo
+
+```{r}
+Internet$`Urbano encuesta`=NULL
+Internet$`Rural encuesta` =NULL
+
+```
+Después procedo a crear una columna "Total" que brinde una apreciación general de la población que fue encuestada
+
+```{r}
+Internet$`Total`= rowSums(Internet[ ,2:3])
+
+```
+Luego, procedo a crear dos columnas que brinden el porcentaje con respecto al total
+
+```{r}
+Internet$`Si tiene - Porcentaje`= (Internet$`Sí tiene conexión a internet`/Internet$Total)*100
+
+Internet$`No tiene - Porcentaje`= (Internet$`No tiene conexión a internet`/Internet$Total)*100
+
+```
+Finalmente ordeno el data frame creando un nuevo nombre de la data y poniendo las columnas que quiero en su lugar
+
+```{r}
+DataInternet= Internet[,c(4,1,2,3,6,7,5)]
+```
